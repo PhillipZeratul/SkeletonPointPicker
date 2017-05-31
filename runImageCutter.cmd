@@ -1,1 +1,1 @@
-for /r %%i in (*.png) do python SkeletonPointPicker.py %%~nxi
+for /r %%i in (Pictures/*.png) do python SkeletonPointPicker.py %%~nxi
