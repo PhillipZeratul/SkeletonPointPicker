@@ -11,4 +11,5 @@ Usage: $ python SkeletonPointPicker.py path/to/image.png
   4. Hit 'Space' on keyboard to end pin bones and save result to a .json file.
   
 runImageCutter is a shell script for running SkeletonPointPicker.py with all the images in Pictures folder.
+
 runImageCutter.cmd is a Windows cmd script for running SkeletonPointPicker.py with all the images in Pictures folder on Windows.
