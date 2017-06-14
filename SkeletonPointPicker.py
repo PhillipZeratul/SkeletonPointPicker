@@ -6,7 +6,8 @@ import os
 
 
 isDrawing = False
-skeletonPointList = []
+bonePointList = []
+boneIsTailList = []
 COLORSTEP = np.array([0, 40, -40])
 
 
@@ -15,7 +16,8 @@ def ClickAndPickSkeleton(event, x, y, flags, param):
     global sourceImage, sourceClone
     global lastPoint
     global color, COLORSTEP
-    global skeletonPointList
+    global bonePointList, boneIsTailList
+    global isRootBone
 
     # The starting point of part root
     if event == cv2.EVENT_RBUTTONDOWN:
@@ -24,7 +26,11 @@ def ClickAndPickSkeleton(event, x, y, flags, param):
         cv2.circle(sourceClone, (x, y), 1, color, 2)
         cv2.imshow("sourceImage", sourceClone)
         lastPoint = (x, y)
-        skeletonPointList.append((x, y))
+        bonePointList.append((x, y))
+        # If you click rightButton, then last bone is tail.
+        isRootBone = True
+        if len(boneIsTailList) > 1:
+            boneIsTailList[-1] = True
 
     # Child bones of part root
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -34,7 +40,14 @@ def ClickAndPickSkeleton(event, x, y, flags, param):
             cv2.line(sourceClone, lastPoint, (x, y), color, 2)
             cv2.imshow("sourceImage", sourceClone)
             lastPoint = (x, y)
-            skeletonPointList.append((x, y))
+            bonePointList.append((x, y))
+            # If you click leftButton, then add a new bone.
+            if isRootBone:
+                isRootBone = False
+            else:
+                boneIsTailList[-1] = False
+
+            boneIsTailList.append(True)
 
     # Bone preview
     elif event == cv2.EVENT_MOUSEMOVE:
@@ -54,10 +67,18 @@ def GetFileName(path):
     return fileName
 
 
+def UnDo():
+    #global bonePointList, boneIsTailList
+
+    #bonePointList = bonePointList[0:-1]
+    #boneIsTailList = boneIsTailList[0:-1]
+    pass
+
+
 def main():
     global isDrawing
     global sourceImage, sourceClone
-    global skeletonPointList
+    global bonePointList
     global lastPoint
     global color, COLORSTEP
     global fileName
@@ -67,7 +88,7 @@ def main():
     sourceImage = cv2.imread("Pictures/" + sys.argv[1])
     sourceClone = sourceImage.copy()
 
-    cv2.namedWindow("sourceImage", cv2.WINDOW_NORMAL)
+    cv2.namedWindow("sourceImage", cv2.WINDOW_NORMAL or cv2.WINDOW_GUI_NORMAL or cv2.WINDOW_KEEPRATIO)
     cv2.imshow("sourceImage", sourceImage)
     cv2.setMouseCallback("sourceImage", ClickAndPickSkeleton)
 
@@ -76,17 +97,25 @@ def main():
 
         if key == 27:  # ESC
             isDrawing = False
-            skeletonPointList = []
+            bonePointList = []
             sourceClone = sourceImage.copy()
             cv2.imshow("sourceImage", sourceClone)
 
         if key == 32:  # Spacebar
             with open('Skeleton/' + fileName + '.json', 'w') as outfile:
-                json.dump(skeletonPointList, outfile)
+                json.dump(bonePointList, outfile)
+
+            with open('boneInformation.json', 'w') as outfile:
+                json.dump({'isTail': boneIsTailList, 'boneBelongsToPart': []}, outfile,
+                          sort_keys=False, indent=4)
 
             # Save the notation image to /Results folder
             cv2.imwrite("Results/" + fileName + ".result.png", sourceClone)
             break
+
+        # undo
+        if key == 8:  # Backspace
+            UnDo()
 
     cv2.destroyAllWindows()
     cv2.waitKey(1)
