@@ -67,7 +67,7 @@ def main():
     sourceImage = cv2.imread("Pictures/" + sys.argv[1])
     sourceClone = sourceImage.copy()
 
-    cv2.namedWindow("sourceImage")
+    cv2.namedWindow("sourceImage", cv2.WINDOW_NORMAL)
     cv2.imshow("sourceImage", sourceImage)
     cv2.setMouseCallback("sourceImage", ClickAndPickSkeleton)
 
