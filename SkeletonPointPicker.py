@@ -105,7 +105,7 @@ def main():
             with open('Skeleton/' + fileName + '.json', 'w') as outfile:
                 json.dump(bonePointList, outfile)
 
-            with open('boneInformation.json', 'w') as outfile:
+            with open('BoneInformation/boneInformation.json', 'w') as outfile:
                 json.dump({'isTail': boneIsTailList, 'boneBelongsToPart': []}, outfile,
                           sort_keys=False, indent=4)
 
